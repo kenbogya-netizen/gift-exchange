@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta name="referrer" content="no-referrer">
+  <title>Secret Gift Exchange</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --green: #0f3b2d;
+      --green-soft: #1d5a45;
+      --cranberry: #a81d3d;
+      --cranberry-dark: #86152f;
+      --gold: #e0b252;
+      --gold-soft: #fbf0d3;
+      --paper: #fffdf9;
+      --ink: #1f2a25;
+      --muted: #5d6a63;
+      --error: #a31621;
+      --serif: "Fraunces", Georgia, "Times New Roman", serif;
+      --sans: "Nunito", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { -webkit-text-size-adjust: 100%; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 18px 14px 40px;
+      font-family: var(--sans);
+      color: var(--ink);
+      background-color: var(--green);
+      background-image: radial-gradient(rgba(224, 178, 82, .22) 1.6px, transparent 1.8px);
+      background-size: 24px 24px;
+    }
+
+    .card {
+      position: relative;
+      max-width: 440px;
+      margin: 16px auto 0;
+      background: var(--paper);
+      border-radius: 22px;
+      overflow: hidden;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, .35);
+    }
+
+    /* Ribbon across the top of the card */
+    .ribbon {
+      background: var(--cranberry);
+      border-bottom: 5px solid var(--gold);
+      padding: 26px 20px 20px;
+      text-align: center;
+      color: #fff;
+    }
+
+    .gift { font-size: 52px; line-height: 1; margin-bottom: 8px; }
+
+    .org {
+      font-family: var(--serif);
+      font-weight: 800;
+      font-size: 30px;
+      letter-spacing: .5px;
+      margin: 0;
+    }
+
+    .motto {
+      margin: 6px 0 0;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--gold-soft);
+    }
+
+    .body { padding: 24px 22px 26px; }
+
+    h1 {
+      font-family: var(--serif);
+      font-weight: 600;
+      font-size: 24px;
+      line-height: 1.25;
+      color: var(--green);
+      margin: 0 0 14px;
+      text-align: center;
+    }
+
+    .steps {
+      margin: 0 0 6px;
+      padding: 14px 16px 14px 36px;
+      background: var(--gold-soft);
+      border-radius: 12px;
+      font-size: 15px;
+      line-height: 1.55;
+      color: var(--ink);
+    }
+    .steps li + li { margin-top: 4px; }
+
+    label {
+      display: block;
+      margin: 22px 0 8px;
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--green);
+    }
+
+    input, select {
+      width: 100%;
+      padding: 15px 14px;
+      border: 2px solid #cfd8d3;
+      border-radius: 12px;
+      font-family: var(--sans);
+      font-size: 17px;           /* 16px+ stops phones zooming in */
+      color: var(--ink);
+      background: #fff;
+    }
+
+    input:focus-visible, select:focus-visible, button:focus-visible {
+      outline: 3px solid var(--gold);
+      outline-offset: 2px;
+      border-color: var(--green-soft);
+    }
+
+    .welcome {
+      margin: 0 0 14px;
+      text-align: center;
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--ink);
+      overflow-wrap: anywhere;
+    }
+
+    button#revealButton {
+      width: 100%;
+      margin-top: 26px;
+      padding: 18px 12px;
+      border: none;
+      border-radius: 14px;
+      background: var(--cranberry);
+      color: #fff;
+      font-family: var(--sans);
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: .4px;
+      cursor: pointer;
+      box-shadow: 0 5px 0 var(--cranberry-dark);
+      transition: transform .08s ease, box-shadow .08s ease;
+    }
+    button#revealButton:active:not(:disabled) {
+      transform: translateY(4px);
+      box-shadow: 0 1px 0 var(--cranberry-dark);
+    }
+    button#revealButton:disabled {
+      background: #9aa5a0;
+      box-shadow: 0 5px 0 #7d8984;
+      cursor: not-allowed;
+    }
+
+    #message {
+      margin-top: 16px;
+      min-height: 22px;
+      font-size: 15px;
+      line-height: 1.5;
+      font-weight: 600;
+      color: var(--error);
+      text-align: center;
+    }
+    #message:empty { display: none; }
+
+    .hidden { display: none; }
+
+    /* ---------- The reveal: a gift tag on a string ---------- */
+    #result { text-align: center; }
+
+    .tag-wrap {
+      display: flex;
+      justify-content: center;
+      transform-origin: 50% 0;
+    }
+    .tag-wrap.swing { animation: swing 1.6s ease-out 1; }
+
+    @keyframes swing {
+      0%   { transform: rotate(-9deg); }
+      25%  { transform: rotate(6deg); }
+      50%  { transform: rotate(-3deg); }
+      75%  { transform: rotate(1.5deg); }
+      100% { transform: rotate(0); }
+    }
+
+    .tag {
+      position: relative;
+      width: 100%;
+      max-width: 320px;
+      margin-top: 34px;
+      padding: 34px 18px 26px;
+      background: var(--gold-soft);
+      border: 3px solid var(--gold);
+      clip-path: polygon(14% 0, 86% 0, 100% 12%, 100% 100%, 0 100%, 0 12%);
+    }
+    .tag::before {                 /* punched hole */
+      content: "";
+      position: absolute;
+      top: 12px; left: 50%;
+      width: 16px; height: 16px;
+      margin-left: -8px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: inset 0 0 0 3px var(--gold);
+    }
+    .tag-small {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+    .recipient {
+      font-family: var(--serif);
+      font-weight: 800;
+      font-size: 32px;
+      line-height: 1.15;
+      color: var(--cranberry);
+      margin: 12px 0 10px;
+      overflow-wrap: anywhere;
+    }
+    .tag-number {
+      margin: 0;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .result-title {
+      font-family: var(--serif);
+      font-weight: 600;
+      font-size: 24px;
+      color: var(--green);
+      margin: 0 0 4px;
+    }
+    .result-note {
+      margin: 22px 0 0;
+      padding: 14px 16px;
+      background: var(--gold-soft);
+      border-radius: 12px;
+      font-size: 15px;
+      line-height: 1.55;
+      text-align: left;
+    }
+    .result-note strong { color: var(--green); }
+
+    #confetti {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 50;
+    }
+
+    .footer {
+      margin-top: 26px;
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tag-wrap.swing { animation: none; }
+      button#revealButton { transition: none; }
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="confetti" aria-hidden="true"></canvas>
+
+  <main class="card">
+
+    <header class="ribbon">
+      <div class="gift" aria-hidden="true">🎁</div>
+      <p class="org">LOVE IS CARING</p>
+      <p class="motto">One Love For All ❤️</p>
+    </header>
+
+    <div class="body">
+
+      <h1>Secret Gift Exchange</h1>
+
+      <p id="welcome" class="welcome hidden"></p>
+
+      <div id="selectionArea" class="hidden">
+        <ol class="steps">
+          <li>Choose a number.</li>
+          <li>Tap the red button to see who you are buying a gift for.</li>
+        </ol>
+
+        <label for="giftNumber">Your number</label>
+        <select id="giftNumber">
+          <option value="">Loading numbers…</option>
+        </select>
+
+        <button id="revealButton" type="button" onclick="revealGift()">
+          REVEAL MY SECRET GIFT RECIPIENT
+        </button>
+      </div>
+
+      <div id="message" role="alert"></div>
+
+      <div id="result" class="hidden">
+        <p class="result-title">Your choice is confirmed 🎉</p>
+
+        <div class="tag-wrap" id="tagWrap">
+          <div class="tag">
+            <p class="tag-small">You are buying a gift for</p>
+            <div class="recipient" id="recipientName"></div>
+            <p class="tag-number" id="tagNumber"></p>
+          </div>
+        </div>
+
+        <p class="result-note">
+          <strong>Keep it secret. 🤫</strong><br>
+          You can reveal only once and this cannot be repeated.
+          Take a screenshot or write the name down now.
+        </p>
+      </div>
+
+      <p class="footer">
+        LOVE IS CARING ❤️ One Love For All<br>
+        Secret Gift Exchange
+      </p>
+
+    </div>
+  </main>
+
+  <script>
+    var numberSelect = document.getElementById("giftNumber");
+    var button = document.getElementById("revealButton");
+    var message = document.getElementById("message");
+    var BUTTON_TEXT = "REVEAL MY SECRET GIFT RECIPIENT";
+
+    // PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL BETWEEN THE QUOTES (it ends with /exec)
+    var API_URL = "https://script.google.com/macros/s/AKfycbwBoBXfAfY9MuBolvO_MdAqBX7DCEsxRFt6tDvn82uvOwSXiE_Yc1hlZ-gzZoW73U5JOQ/exec";
+
+    // Each member opens their own personal link, which ends in ?c=THEIRCODE
+    var MEMBER_CODE = (new URLSearchParams(window.location.search).get("c") || "").trim();
+    var OWN_NUMBER = 0;
+
+    /* ---------- Load the numbers still free ---------- */
+    function loadNumbers() {
+      numberSelect.innerHTML = '<option value="">Loading numbers…</option>';
+
+      fetch(API_URL + "?action=numbers")
+        .then(function (r) { return r.json(); })
+        .then(function (numbers) {
+          numberSelect.innerHTML = '<option value="">Choose your number</option>';
+
+          numbers.forEach(function (item) {
+            var option = document.createElement("option");
+            option.value = item.number;
+            if (item.number === OWN_NUMBER) {
+              option.textContent = "Number " + item.number + " (your own number)";
+              option.disabled = true;
+            } else {
+              option.textContent = item.available
+                ? "Number " + item.number
+                : "Number " + item.number + " (already taken)";
+              option.disabled = !item.available;
+            }
+            numberSelect.appendChild(option);
+          });
+        })
+        .catch(function () {
+          numberSelect.innerHTML = '<option value="">Could not load numbers</option>';
+          message.textContent = "Could not load the numbers. Refresh the page and try again.";
+        });
+    }
+
+    /* ---------- Reveal ---------- */
+    function revealGift() {
+      var code = MEMBER_CODE;
+      var number = numberSelect.value;
+
+      message.textContent = "";
+
+      if (!code) {
+        message.textContent = "Please open the personal link the admin sent you.";
+        return;
+      }
+      if (!number) {
+        message.textContent = "Choose a number first.";
+        return;
+      }
+
+      button.disabled = true;
+      button.textContent = "PLEASE WAIT…";
+
+      // text/plain keeps the request simple so the browser accepts it from GitHub
+      fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "reveal", code: code, number: number })
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (response) {
+          if (response && response.success) {
+            showResult(response);
+          } else {
+            message.textContent = (response && response.message) || "Something went wrong. Please try again.";
+            resetButton();
+            loadNumbers();
+          }
+        })
+        .catch(function () {
+          message.textContent = "Connection problem. Check your internet and try again, then check with the admin before retrying.";
+          resetButton();
+          loadNumbers();
+        });
+    }
+
+    function resetButton() {
+      button.disabled = false;
+      button.textContent = BUTTON_TEXT;
+    }
+
+    function showResult(response) {
+      document.getElementById("selectionArea").classList.add("hidden");
+      document.getElementById("welcome").classList.add("hidden");
+      message.textContent = "";
+
+      document.getElementById("recipientName").textContent = response.recipient;
+      document.getElementById("tagNumber").textContent = "Number " + response.number;
+
+      document.getElementById("result").classList.remove("hidden");
+      document.getElementById("tagWrap").classList.add("swing");
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      launchConfetti();
+    }
+
+    /* ---------- Confetti (one short burst, skipped if motion is reduced) ---------- */
+    function launchConfetti() {
+      if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+      var canvas = document.getElementById("confetti");
+      var ctx = canvas.getContext("2d");
+      var colours = ["#a81d3d", "#e0b252", "#1d5a45", "#fbf0d3", "#ffffff"];
+      var pieces = [];
+      var start = Date.now();
+      var DURATION = 3200;
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      resize();
+
+      for (var i = 0; i < 130; i++) {
+        pieces.push({
+          x: Math.random() * canvas.width,
+          y: -20 - Math.random() * canvas.height * 0.5,
+          w: 6 + Math.random() * 6,
+          h: 9 + Math.random() * 8,
+          colour: colours[Math.floor(Math.random() * colours.length)],
+          speed: 2.2 + Math.random() * 3,
+          drift: (Math.random() - 0.5) * 2,
+          angle: Math.random() * Math.PI,
+          spin: (Math.random() - 0.5) * 0.25
+        });
+      }
+
+      function frame() {
+        var elapsed = Date.now() - start;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        pieces.forEach(function (p) {
+          p.y += p.speed;
+          p.x += p.drift;
+          p.angle += p.spin;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.angle);
+          ctx.fillStyle = p.colour;
+          ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+          ctx.restore();
+        });
+
+        if (elapsed < DURATION) {
+          requestAnimationFrame(frame);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+      requestAnimationFrame(frame);
+    }
+
+    /* ---------- Start: check the personal link, greet the member ---------- */
+    function startPage() {
+      var welcome = document.getElementById("welcome");
+
+      if (!MEMBER_CODE) {
+        message.textContent = "Please open the personal link the admin sent you.";
+        return;
+      }
+
+      welcome.textContent = "Loading…";
+      welcome.classList.remove("hidden");
+
+      fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "status", code: MEMBER_CODE })
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (info) {
+          if (!info.success) {
+            welcome.classList.add("hidden");
+            message.textContent = info.message;
+            return;
+          }
+
+          welcome.textContent = "Welcome, " + info.name + " 👋";
+
+          if (info.revealed) {
+            message.textContent = "You have already revealed your secret gift recipient. If you need help, please contact the admin.";
+            return;
+          }
+
+          OWN_NUMBER = info.ownNumber;
+          document.getElementById("selectionArea").classList.remove("hidden");
+          loadNumbers();
+        })
+        .catch(function () {
+          welcome.classList.add("hidden");
+          message.textContent = "Could not connect. Refresh the page and try again.";
+        });
+    }
+
+    startPage();
+  </script>
+</body>
+</html>
